@@ -1,0 +1,162 @@
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+class Persona {
+protected:
+    string nombre;
+    int edad;
+public:
+    Persona() : nombre(""), edad(0) {}
+    Persona(string n, int e) : nombre(n), edad(e) {}
+    void setNombre(string n) { nombre = n; }
+    void setEdad(int e) { if(e > 0) edad = e; }
+    string getNombre() const { return nombre; }
+    int getEdad() const { return edad; }
+};
+
+class Estudiante : public Persona {
+protected:
+    string codigo;
+    float promedio;
+public:
+    Estudiante() : Persona(), codigo(""), promedio(0) {}
+    Estudiante(string n, int e, string c, float p) : Persona(n, e), codigo(c), promedio(p) {}
+    void setCodigo(string c) { codigo = c; }
+    void setPromedio(float p) { if(p >= 0 && p <= 5) promedio = p; }
+    string getCodigo() const { return codigo; }
+    float getPromedio() const { return promedio; }
+};
+
+class Universitario : public Estudiante {
+    string carrera;
+    int semestre;
+public:
+    Universitario() : Estudiante(), carrera(""), semestre(1) {}
+    Universitario(string n, int e, string c, float p, string ca, int s)
+        : Estudiante(n, e, c, p), carrera(ca), semestre(s) {}
+    void setCarrera(string ca) { carrera = ca; }
+    void setSemestre(int s) { if(s > 0) semestre = s; }
+    string getCarrera() const { return carrera; }
+    int getSemestre() const { return semestre; }
+};
+
+class CuentaBancaria {
+protected:
+    string id;
+    float saldo;
+public:
+    CuentaBancaria() : id(""), saldo(0) {}
+    CuentaBancaria(string i, float s) : id(i), saldo(s) {}
+    void depositar(float m) { if(m > 0) saldo += m; }
+    bool retirar(float m) { if(m > 0 && m <= saldo) { saldo -= m; return true; } return false; }
+    string getId() const { return id; }
+    float getSaldo() const { return saldo; }
+};
+
+class CuentaAhorros : public CuentaBancaria {
+    float interes;
+public:
+    CuentaAhorros() : CuentaBancaria(), interes(0.02f) {}
+    CuentaAhorros(string i, float s, float in) : CuentaBancaria(i, s), interes(in) {}
+    void aplicarInteres() { saldo += saldo * interes; }
+};
+
+class Curso {
+    string nombre;
+    int creditos;
+public:
+    Curso() : nombre(""), creditos(0) {}
+    Curso(string n, int c) : nombre(n), creditos(c) {}
+    string getNombre() const { return nombre; }
+    int getCreditos() const { return creditos; }
+};
+
+class SistemaUniversitario {
+    vector<Universitario> estudiantes;
+    vector<Curso> cursos;
+public:
+    void agregarEstudiante(const Universitario& u) { estudiantes.push_back(u); }
+    void agregarCurso(const Curso& c) { cursos.push_back(c); }
+    void listarEstudiantes() {
+        for(const auto& e : estudiantes) {
+            cout << e.getNombre() << " - " << e.getCodigo() << " - " << e.getCarrera() << " Sem: " << e.getSemestre() << endl;
+        }
+    }
+    void listarCursos() {
+        for(const auto& c : cursos) {
+            cout << c.getNombre() << " (" << c.getCreditos() << " créditos)" << endl;
+        }
+    }
+};
+
+void menuPrincipal() {
+    SistemaUniversitario sistema;
+    CuentaAhorros cuenta("CU-01", 100000, 0.03f);
+
+    int op = 0;
+    while(op != 6) {
+        cout << "\n----- MENU -----\n";
+        cout << "1. Registrar estudiante\n";
+        cout << "2. Listar estudiantes\n";
+        cout << "3. Agregar curso\n";
+        cout << "4. Listar cursos\n";
+        cout << "5. Operar cuenta bancaria\n";
+        cout << "6. Salir\n";
+        cout << "Opcion: ";
+        cin >> op;
+
+        if(op == 1) {
+            string n, c, ca;
+            int e, s;
+            float p;
+            cout << "Nombre: ";
+            cin >> n;
+            cout << "Edad: ";
+            cin >> e;
+            cout << "Codigo: ";
+            cin >> c;
+            cout << "Promedio: ";
+            cin >> p;
+            cout << "Carrera: ";
+            cin >> ca;
+            cout << "Semestre: ";
+            cin >> s;
+            sistema.agregarEstudiante(Universitario(n, e, c, p, ca, s));
+        }
+        else if(op == 2) {
+            sistema.listarEstudiantes();
+        }
+        else if(op == 3) {
+            string n;
+            int cr;
+            cout << "Nombre del curso: ";
+            cin >> n;
+            cout << "Creditos: ";
+            cin >> cr;
+            sistema.agregarCurso(Curso(n, cr));
+        }
+        else if(op == 4) {
+            sistema.listarCursos();
+        }
+        else if(op == 5) {
+            int x;
+            cout << "1. Depositar\n2. Retirar\n3. Ver saldo\nOpcion: ";
+            cin >> x;
+            if(x == 1) {
+                float m; cout << "Monto: "; cin >> m; cuenta.depositar(m);
+            } else if(x == 2) {
+                float m; cout << "Monto: "; cin >> m;
+                if(!cuenta.retirar(m)) cout << "Fondos insuficientes\n";
+            } else if(x == 3) {
+                cout << "Saldo: " << cuenta.getSaldo() << endl;
+            }
+        }
+    }
+}
+
+int main() {
+    menuPrincipal();
+    return 0;
+}
